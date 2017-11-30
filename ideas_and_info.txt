@@ -1,4 +1,10 @@
-Ideas
+Links:
+
+https://developers.google.com/maps/documentation/javascript/libraries
+https://transit.land/documentation/datastore/api-endpoints.html
+https://developers.google.com/maps/documentation/javascript/tutorial
+
+------------------------------------------------------------------------------
 
 Desired Iiformation we can extract from Stops json objects:
 -routes_serving_stop.route_name
