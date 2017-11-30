@@ -1,0 +1,6 @@
+Ideas
+
+Desired Iiformation we can extract from Stops json objects:
+-routes_serving_stop.route_name
+-served_by_vehicle_types
+-tags (street address, osm_way_id)

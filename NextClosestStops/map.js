@@ -164,7 +164,7 @@ function AjaxError(data)
 
 function stopClicked(data)
 {
-  
+  //console.log(data);
 }
 
 function dragFunction(data)
