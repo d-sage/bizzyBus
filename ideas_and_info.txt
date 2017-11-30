@@ -3,10 +3,17 @@ Links:
 https://developers.google.com/maps/documentation/javascript/libraries
 https://transit.land/documentation/datastore/api-endpoints.html
 https://developers.google.com/maps/documentation/javascript/tutorial
+https://transit.land/feed-registry/operators/o-c2kx-spokanetransitauthority
 
 ------------------------------------------------------------------------------
 
-Desired Iiformation we can extract from Stops json objects:
+Desired information we can extract from Stops json objects:
 -routes_serving_stop.route_name
 -served_by_vehicle_types
 -tags (street address, osm_way_id)
+
+Desired information we can extract from Routes json objects:
+-geometry (gives sets of points that correspond to the route pattern it follows)
+-name
+-stops_served_by_route
+-...much more

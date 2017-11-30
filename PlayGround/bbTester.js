@@ -37,8 +37,8 @@ function getMiscClick($evt)
 {
 	
 	var $keyValues = {};
-	
-	$.ajax({url:"https://realtime.spokanetransit.com:8442/TI_FixedRoute_Line",
+
+	$.ajax({url:"https://transit.land/api/v1/schedule_stop_pairs?feed_onestop_id=f-c2kx-spokanetransitauthority",
 			cache: false,
 			type: "GET",
 			data: $keyValues,
