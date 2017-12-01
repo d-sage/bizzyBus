@@ -116,18 +116,24 @@ function processData(data)
 
   for (var i = 0; i < data["features"].length; i ++)
   {
-    var lat = data["features"][i]["geometry"]["coordinates"][1];
-    var long = data["features"][i]["geometry"]["coordinates"][0];
+    var lat = parseFloat(data["features"][i]["geometry"]["coordinates"][1]);
+    var lon = parseFloat(data["features"][i]["geometry"]["coordinates"][0]);
 
     //console.log(lat + " | " + long);
 
     var stopPos = 
     {
       lat: lat,
-      lng: long
+      lng: lon
     };
 
     var title = data["features"][i]["properties"]["name"];
+	
+	var routeList = data.features[i].properties.routes_serving_stop;
+	var routes = "";
+	$.each(routeList, function(index, item){
+		routes += item.route_name + " ";
+	});
 
 //--------------- Pin- comment this out for infoWindow
     var marker = new google.maps.Marker(
@@ -136,11 +142,17 @@ function processData(data)
       draggable:false,
       animation: google.maps.Animation.DROP,
       position:stopPos,
-      title: title
+      title: title,
+	  customInfo: "osm_way_id: " + data.features[i].properties.tags.osm_way_id + " | Routes: " + routes
     });
 
     //This is to set up the click event for selecting a stop - not implemented yet
-    marker.addListener('click', stopClicked);
+    //marker.addListener('click', stopClicked);
+	google.maps.event.addListener(marker, "click", function(event){
+		console.log("Lat: " + this.position.lat());
+		console.log("Lng: " + this.position.lng());
+		console.log(this.customInfo);
+	});
 //--------------------
 
     //This is for the info windows, just uncomment the following and comment out the marker above
@@ -162,9 +174,11 @@ function AjaxError(data)
   console.log("AjaxError was hit");
 }
 
-function stopClicked(data)
+function stopClicked(data, other)
 {
-  //console.log(data);
+  console.log("Lat: " + data.latLng.lat());
+  console.log("Lng: " + data.latLng.lng());
+  console.log(data.customInfo);
 }
 
 function dragFunction(data)

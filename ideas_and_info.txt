@@ -4,6 +4,9 @@ https://developers.google.com/maps/documentation/javascript/libraries
 https://transit.land/documentation/datastore/api-endpoints.html
 https://developers.google.com/maps/documentation/javascript/tutorial
 https://transit.land/feed-registry/operators/o-c2kx-spokanetransitauthority
+https://developers.google.com/maps/documentation/javascript/examples/event-simple
+
+https://stackoverflow.com/questions/11378450/google-map-api-v3-how-to-add-custom-data-to-markers
 
 ------------------------------------------------------------------------------
 
