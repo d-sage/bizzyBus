@@ -25,3 +25,15 @@ Desired information we can extract from Routes json objects:
 -name
 -stops_served_by_route
 -...much more
+
+Get info about a stop using this query and its corresponding onestop_id
+https://transit.land/api/v1/onestop_id/s-c2kxb24b7p-hastingspark~ride
+
+Route geometry?
+/api/v1/routes?include_geometry=true
+
+Schedule / stop_pairs using a onestop_id
+https://transit.land/api/v1/schedule_stop_pairs?destination_onestop_id=s-c2kxb24b7p-hastingspark~ride
+
+Schedule / stop_pairs using a route_onestop_id
+/api/v1/schedule_stop_pairs?route_onestop_id=r-9q8y-richmond~dalycity~millbrae

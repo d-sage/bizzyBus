@@ -95,7 +95,7 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos)
 function getBuses(pos)
 {
   var perPage = 10;     //Results per query
-  var radius = 1000;    //Radius around point
+  var radius = 4000;    //Radius around point
 
   var lng = pos["lng"];
   var lat = pos["lat"];
@@ -146,20 +146,42 @@ function processData(data)
     var title = data["features"][i]["properties"]["name"];
 	
 	var routeList = data.features[i].properties.routes_serving_stop;
-	var routes = "";
+	var routeNums = "";
+	var routeIds = "";
 	$.each(routeList, function(index, item){
-		routes += item.route_name + " ";
+		routeNums += item.route_name + " ";
+		routeIds += item.route_onestop_id + " ";
 	});
 
 //--------------- Pin- comment this out for infoWindow
-    var marker = new google.maps.Marker(
+
+	placeStopMarker(stopPos, title, data.features[i].properties.tags.osm_way_id, data.features[i].properties.onestop_id, routeIds, routeNums);
+	
+//--------------------
+
+    //This is for the info windows, just uncomment the following and comment out the marker above
+	/*
+    var stop = new google.maps.InfoWindow;
+    stop.setPosition(stopPos);
+    stop.setContent(title);
+    stop.open(map);
+	*/
+
+  }
+
+
+}
+
+function placeStopMarker(stopPos, title, osm_way_id, onestop_id, routeIds, routeNums)
+{
+	var marker = new google.maps.Marker(
     {
       map:map,
       draggable:false,
       animation: google.maps.Animation.DROP,
       position:stopPos,
       title: title,
-	  customInfo: "osm_way_id: " + data.features[i].properties.tags.osm_way_id + " | Routes: " + routes
+	  customInfo: "osm_way_id: " + osm_way_id + " | Route #'s: " + routeNums + " | Route Ids: " + routeIds + " | onestop_id: " + onestop_id
     });
 
     //This is to set up the click event for selecting a stop - TESTING - using to display lat/long and customeInfo
@@ -176,26 +198,12 @@ function processData(data)
 	
 	//These mouseover/mouseout events deal with displaying info pertaining to the Stop
 	google.maps.event.addListener(marker, "mouseover", function(event){
-		infoWindow.setContent(routes);
+		infoWindow.setContent(this.customInfo);
 		infoWindow.open(map,this);
 	});
 	google.maps.event.addListener(marker, "mouseout", function(event){
 		infoWindow.close();
 	});
-	
-//--------------------
-
-    //This is for the info windows, just uncomment the following and comment out the marker above
-	/*
-    var stop = new google.maps.InfoWindow;
-    stop.setPosition(stopPos);
-    stop.setContent(title);
-    stop.open(map);
-	*/
-
-  }
-
-
 }
 
 function AjaxError(data)

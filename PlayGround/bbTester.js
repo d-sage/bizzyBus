@@ -37,8 +37,7 @@ function getMiscClick($evt)
 {
 	
 	var $keyValues = {};
-
-	$.ajax({url:"https://transit.land/api/v1/schedule_stop_pairs?feed_onestop_id=f-c2kx-spokanetransitauthority",
+	$.ajax({url:"https://transit.land/api/v1/schedule_stop_pairs?destination_onestop_id=s-c2kxb24b7p-hastingspark~ride",
 			cache: false,
 			type: "GET",
 			data: $keyValues,
