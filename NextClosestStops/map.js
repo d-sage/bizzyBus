@@ -100,8 +100,6 @@ function getBuses(pos)
   var lng = pos["lng"];
   var lat = pos["lat"];
 
-  //console.log(lat + " | " + lng);
-
   $.ajax(
   {
     url: transitlandURL, 
@@ -132,10 +130,8 @@ function processData(data)
 
   for (var i = 0; i < data["features"].length; i ++)
   {
-    var lat = parseFloat(data["features"][i]["geometry"]["coordinates"][1]);
-    var lon = parseFloat(data["features"][i]["geometry"]["coordinates"][0]);
-
-    //console.log(lat + " | " + long);
+    var lat = data["features"][i]["geometry"]["coordinates"][1];
+    var lon = data["features"][i]["geometry"]["coordinates"][0];
 
     var stopPos = 
     {
@@ -145,6 +141,7 @@ function processData(data)
 
     var title = data["features"][i]["properties"]["name"];
 	
+	//Collect Route info
 	var routeList = data.features[i].properties.routes_serving_stop;
 	var routeNums = "";
 	var routeIds = "";
@@ -152,10 +149,14 @@ function processData(data)
 		routeNums += item.route_name + " ";
 		routeIds += item.route_onestop_id + " ";
 	});
+	
+	var osm_way_id = data.features[i].properties.tags.osm_way_id;
+	var onestop_id = data.features[i].properties.onestop_id;
 
 //--------------- Pin- comment this out for infoWindow
 
-	placeStopMarker(stopPos, title, data.features[i].properties.tags.osm_way_id, data.features[i].properties.onestop_id, routeIds, routeNums);
+	//See function for details
+	placeStopMarker(stopPos, title, osm_way_id, onestop_id, routeIds, routeNums);
 	
 //--------------------
 
@@ -172,8 +173,12 @@ function processData(data)
 
 }
 
+//This function allows for stopPos(lat/lng) and other components
+//to be used to create a busStop marker with related events to display info: click & mouseover
 function placeStopMarker(stopPos, title, osm_way_id, onestop_id, routeIds, routeNums)
 {
+	
+	//Creates the initial Marker with provided information
 	var marker = new google.maps.Marker(
     {
       map:map,
@@ -184,7 +189,7 @@ function placeStopMarker(stopPos, title, osm_way_id, onestop_id, routeIds, route
 	  customInfo: "osm_way_id: " + osm_way_id + " | Route #'s: " + routeNums + " | Route Ids: " + routeIds + " | onestop_id: " + onestop_id
     });
 
-    //This is to set up the click event for selecting a stop - TESTING - using to display lat/long and customeInfo
+    //This is to set up the click event for selecting a stop
     //marker.addListener('click', stopClicked);
 	google.maps.event.addListener(marker, "click", function(event){
 		console.log("Lat: " + this.position.lat());
@@ -196,7 +201,7 @@ function placeStopMarker(stopPos, title, osm_way_id, onestop_id, routeIds, route
 		$(infoDiv).show();
 	});
 	
-	//These mouseover/mouseout events deal with displaying info pertaining to the Stop
+	//These mouseover/mouseout events deal with displaying info pertaining to the Stop above the marker
 	google.maps.event.addListener(marker, "mouseover", function(event){
 		infoWindow.setContent(this.customInfo);
 		infoWindow.open(map,this);
@@ -214,9 +219,7 @@ function AjaxError(data)
 
 function stopClicked(data, other)
 {
-  console.log("Lat: " + data.latLng.lat());
-  console.log("Lng: " + data.latLng.lng());
-  console.log(data.customInfo);
+  
 }
 
 function dragFunction(data)
