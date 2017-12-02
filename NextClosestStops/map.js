@@ -8,7 +8,23 @@
 // failed.", it means you probably did not give permission for the browser to
 // locate you.
 
-//$(document).ready(initMap);
+$(document).ready(init);
+
+function init()
+{
+	$("#infoDiv").hide();
+	
+	$("#closeInfo").click(function(){
+		$("#infoDiv").hide();
+	});
+	
+	//Used for resizing the map to fit the maximum of the screen
+	$("#map").height($(window).height());
+	$(window).resize(function(evt){
+		console.log(evt);
+		$("#map").height($(window).height());
+	});
+}
 
 var transitlandURL = "https://transit.land/api/v1/stops.geojson";
 
@@ -146,23 +162,37 @@ function processData(data)
 	  customInfo: "osm_way_id: " + data.features[i].properties.tags.osm_way_id + " | Routes: " + routes
     });
 
-    //This is to set up the click event for selecting a stop - not implemented yet
+    //This is to set up the click event for selecting a stop - TESTING - using to display lat/long and customeInfo
     //marker.addListener('click', stopClicked);
 	google.maps.event.addListener(marker, "click", function(event){
 		console.log("Lat: " + this.position.lat());
 		console.log("Lng: " + this.position.lng());
 		console.log(this.customInfo);
+		
+		var infoDiv = $("#infoDiv");
+		$("#lower").html("<p>" + this.customInfo + "</p>");
+		$(infoDiv).show();
 	});
+	
+	//These mouseover/mouseout events deal with displaying info pertaining to the Stop
+	google.maps.event.addListener(marker, "mouseover", function(event){
+		infoWindow.setContent(routes);
+		infoWindow.open(map,this);
+	});
+	google.maps.event.addListener(marker, "mouseout", function(event){
+		infoWindow.close();
+	});
+	
 //--------------------
 
     //This is for the info windows, just uncomment the following and comment out the marker above
-/*
+	/*
     var stop = new google.maps.InfoWindow;
     stop.setPosition(stopPos);
     stop.setContent(title);
     stop.open(map);
+	*/
 
-*/
   }
 
 

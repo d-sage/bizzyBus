@@ -6,6 +6,11 @@ https://developers.google.com/maps/documentation/javascript/tutorial
 https://transit.land/feed-registry/operators/o-c2kx-spokanetransitauthority
 https://developers.google.com/maps/documentation/javascript/examples/event-simple
 
+https://developers.google.com/maps/documentation/javascript/events
+https://developers.google.com/maps/documentation/javascript/layers
+
+https://stackoverflow.com/questions/21437093/how-to-add-a-button-to-google-maps-infowindow
+
 https://stackoverflow.com/questions/11378450/google-map-api-v3-how-to-add-custom-data-to-markers
 
 ------------------------------------------------------------------------------
