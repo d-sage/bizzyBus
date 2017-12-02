@@ -8,11 +8,11 @@
 // failed.", it means you probably did not give permission for the browser to
 // locate you.
 
-//$(document).ready(initMap);
 
 var transitlandURL = "https://transit.land/api/v1/stops.geojson";
 
-var map, infoWindow;
+var map, infoWindow, home;
+var markers = [];
 function initMap() 
 {
   map = new google.maps.Map(document.getElementById('map'), 
@@ -33,18 +33,21 @@ function initMap()
         lng: position.coords.longitude
       };
 
-      var marker = new google.maps.Marker(
+      console.log(pos);
+
+      home = new google.maps.Marker(
       {
         map:map,
-        draggable:false,
+        draggable:true,
         animation: google.maps.Animation.DROP,
         position:pos,
+        icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
         title: "Current Location"
       });
 
 
       //This is for the drag event, its not implemented yet
-      google.maps.event.addListener(marker, 'dragend', dragFunction);
+      google.maps.event.addListener(home, 'dragend', dragFunction);
 
 
       map.setZoom(15);
@@ -78,7 +81,7 @@ function handleLocationError(browserHasGeolocation, infoWindow, pos)
 //Makes the ajax call for the nearest bus stops
 function getBuses(pos)
 {
-  var perPage = 10;     //Results per query
+  var perPage = 1000;     //Results per query
   var radius = 1000;    //Radius around point
 
   var lng = pos["lng"];
@@ -140,7 +143,8 @@ function processData(data)
     });
 
     //This is to set up the click event for selecting a stop - not implemented yet
-    marker.addListener('click', stopClicked);
+    marker.addListener(marker, 'click', stopClicked);
+    markers.push(marker);
 //--------------------
 
     //This is for the info windows, just uncomment the following and comment out the marker above
@@ -169,6 +173,18 @@ function stopClicked(data)
 
 function dragFunction(data)
 {
+	var pos = {
+        lat: home.getPosition().lat(),
+        lng: home.getPosition().lng()
+    };
+    
+    for (var i = 0; i < markers.length; i++) 
+    {
+        markers[i].setMap(null);
+    }
+    markers = [];
 
+    getBuses(pos);
 }
+
 
