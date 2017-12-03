@@ -162,8 +162,7 @@ function processData(data)
 
 	//See function for details
 	placeStopMarker(stopPos, title, osm_way_id, onestop_id, routeIds, routeNums);
-
-    markers.push(marker);
+	
 //--------------------
 
     //This is for the info windows, just uncomment the following and comment out the marker above
@@ -215,6 +214,8 @@ function placeStopMarker(stopPos, title, osm_way_id, onestop_id, routeIds, route
 	google.maps.event.addListener(marker, "mouseout", function(event){
 		infoWindow.close();
 	});
+	
+    markers.push(marker);
 }
 
 function AjaxError(data)
