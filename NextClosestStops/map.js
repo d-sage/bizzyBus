@@ -26,14 +26,116 @@ function init()
 		console.log(evt);
 		$("#map").height($(window).height());
 	});
+	
+	
+	/*TEST*/
+	var perPage = 50;
+	$.ajax({url:"https://transit.land/api/v1/stops",
+			cache: false,
+			type: "GET",
+			data: {
+				route_onestop_id: "r-c2kq-165",
+				served_by: "o-c2kx-spokanetransitauthority",
+				per_page: perPage
+			},
+			success: stopsForRoute,
+			dataType: "json"
+	});
+	
+	
+	/*TEST*/
+	
+	
 
 }
 
+
+
+
+function stopsForRoute(data)
+{
+	console.log(data);
+	
+	var points = [];
+	for(coordinate of data.stops)
+	{
+	  points.push(coordinate.geometry.coordinates[1] + "," + coordinate.geometry.coordinates[0]);
+	}
+	
+	var stringPoints = points.join("|");
+	
+	console.log(stringPoints);
+	
+	
+	$.ajax({
+		url: 'https://roads.googleapis.com/v1/snapToRoads',
+		type: "GET",
+		data:
+		{
+			interpolate: true,
+			key: apiKey,
+			path: stringPoints
+		},
+		success: plotRoute,
+		error: AjaxError
+	});
+	
+}
+
+function plotRoute(data)
+{
+	console.log(data);
+	
+    processSnapToRoadResponse(data);
+    drawSnappedPolyline();
+	
+}
+
+// Store snapped polyline returned by the snap-to-road service.
+function processSnapToRoadResponse(data) {
+  snappedCoordinates = [];
+  placeIdArray = [];
+  for (var i = 0; i < data.snappedPoints.length; i++) {
+    var latlng = new google.maps.LatLng(
+        data.snappedPoints[i].location.latitude,
+        data.snappedPoints[i].location.longitude);
+    snappedCoordinates.push(latlng);
+    placeIdArray.push(data.snappedPoints[i].placeId);
+  }
+}
+
+// Draws the snapped polyline (after processing snap-to-road response).
+function drawSnappedPolyline() {
+  var snappedPolyline = new google.maps.Polyline({
+    path: snappedCoordinates,
+    strokeColor: 'red',
+    strokeWeight: 4
+  });
+
+  snappedPolyline.setMap(map);
+  polylines.push(snappedPolyline);
+}
+
+
+
+
+
+
+
+
+/*Globals>>>*/
 var transitlandURL = "https://transit.land/api/v1/stops.geojson";
+var apiKey = "AIzaSyBbNcTh39hZiJLtvHEvWCHDtfi8ko19ZWw";
 
 var map, infoWindow, home;
 var markers = [];
 var markerCluster;
+
+var drawingManager;
+var placeIdArray = [];
+var polylines = [];
+var snappedCoordinates = [];
+/*Globals<<<*/
 
 function initMap()
 {
