@@ -3,27 +3,26 @@
 //Original: https://developers.google.com/maps/documentation/javascript/geolocation
 //Also, sorry for the horrible formatting, thank google and cut/paste
 //------------------------------------------------------------------------------------
-
 //Marker Clusterer files obtained from google maps v3 utility library: https://github.com/googlemaps/v3-utility-library
-
 // Note: This example requires that you consent to location sharing when
 // prompted by your browser. If you see the error "The Geolocation service
 // failed.", it means you probably did not give permission for the browser to
 // locate you.
-
 $(document).ready(init);
 
 function init()
 {
 	$("#infoDiv").hide();
-	
-	$("#closeInfo").click(function(){
+
+	$("#closeInfo").click(function()
+	{
 		$("#infoDiv").hide();
 	});
-	
+
 	//Used for resizing the map to fit the maximum of the screen
 	$("#map").height($(window).height());
-	$(window).resize(function(evt){
+	$(window).resize(function(evt)
+	{
 		console.log(evt);
 		$("#map").height($(window).height());
 	});
@@ -35,140 +34,150 @@ var transitlandURL = "https://transit.land/api/v1/stops.geojson";
 var map, infoWindow, home;
 var markers = [];
 var markerCluster;
-function initMap() 
+
+function initMap()
 {
-  map = new google.maps.Map(document.getElementById('map'), 
-  {
-    center: {lat: -34.397, lng: 150.644},
-    zoom: 6
-  });
+	map = new google.maps.Map(document.getElementById('map'),
+	{
+		center:
+		{
+			lat: -34.397,
+			lng: 150.644
+		},
+		zoom: 6
+	});
 
-  infoWindow = new google.maps.InfoWindow;
+	infoWindow = new google.maps.InfoWindow;
 
-  // Try HTML5 geolocation.
-  if (navigator.geolocation) 
-  {
-    navigator.geolocation.getCurrentPosition(function(position) 
-    {
-      var pos = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
-      };
+	// Try HTML5 geolocation.
+	if (navigator.geolocation)
+	{
+		navigator.geolocation.getCurrentPosition(function(position)
+		{
+			var pos = {
+				lat: position.coords.latitude,
+				lng: position.coords.longitude
+			};
 
-      console.log(pos);
+			console.log(pos);
 
-      home = new google.maps.Marker(
-      {
-        map:map,
-        draggable:true,
-        animation: google.maps.Animation.DROP,
-        position:pos,
-        icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
-        title: "Current Location"
-      });
-
-
-      //This is for the drag event, its not implemented yet
-      google.maps.event.addListener(home, 'dragend', dragFunction);
-
-
-      map.setZoom(15);
-      //console.log(map.getZoom());
-      map.setCenter(pos);
+			home = new google.maps.Marker(
+			{
+				map: map,
+				draggable: true,
+				animation: google.maps.Animation.DROP,
+				position: pos,
+				icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+				title: "Current Location"
+			});
 
 
-      // Create the search box and link it to the UI element
-      var input = document.getElementById('pac-input');
-      var searchBox = new google.maps.places.SearchBox(input);
-      map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+			//This is for the drag event, its not implemented yet
+			google.maps.event.addListener(home, 'dragend', dragFunction);
 
-      // Bias the SearchBox results towards current map's viewport.
-      map.addListener('bounds_changed', function() {
-      	searchBox.setBounds(map.getBounds());
-      });
 
-      // Listen for the event fired when the user selects a prediction and retrieve
-      // more details for that place.
-      searchBox.addListener('places_changed', function() {
-          var places = searchBox.getPlaces();
+			map.setZoom(15);
+			//console.log(map.getZoom());
+			map.setCenter(pos);
 
-          if (places.length == 0) {
-            return;
-          }
 
-          // For each place, get the icon, name and location.
-          var bounds = new google.maps.LatLngBounds();
-          places.forEach(function(place) {
-            if (!place.geometry) {
-              console.log("Returned place contains no geometry");
-              return;
-            }
-            
+			// Create the search box and link it to the UI element
+			var input = document.getElementById('pac-input');
+			var searchBox = new google.maps.places.SearchBox(input);
+			map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
 
-	        home.setPosition(place.geometry.location);
-	        map.setCenter(place.geometry.location);
+			// Bias the SearchBox results towards current map's viewport.
+			map.addListener('bounds_changed', function()
+			{
+				searchBox.setBounds(map.getBounds());
+			});
 
-	        for (var i = 0; i < markers.length; i++) 
-    		{
-        		markers[i].setMap(null);
-    		}
+			// Listen for the event fired when the user selects a prediction and retrieve
+			// more details for that place.
+			searchBox.addListener('places_changed', function()
+			{
+				var places = searchBox.getPlaces();
 
-    		markers = [];
+				if (places.length == 0)
+				{
+					return;
+				}
 
-	        getBuses(place.geometry.location);
-            
-          });
-          
-        });
-      
-      	getBuses(pos);
+				// For each place, get the icon, name and location.
+				var bounds = new google.maps.LatLngBounds();
+				places.forEach(function(place)
+				{
+					if (!place.geometry)
+					{
+						console.log("Returned place contains no geometry");
+						return;
+					}
 
-    }, function() 
-    {
-      handleLocationError(true, infoWindow, map.getCenter());
-    });
-  } 
-  else 
-  {
-    // Browser doesn't support Geolocation
-    handleLocationError(false, infoWindow, map.getCenter());
-  }
 
-}//end initMap
+					home.setPosition(place.geometry.location);
+					map.setCenter(place.geometry.location);
 
-function handleLocationError(browserHasGeolocation, infoWindow, pos) 
+					for (var i = 0; i < markers.length; i++)
+					{
+						markers[i].setMap(null);
+					}
+
+					markers = [];
+
+					getBuses(place.geometry.location);
+
+				});
+
+			});
+
+			getBuses(pos);
+
+		}, function()
+		{
+			handleLocationError(true, infoWindow, map.getCenter());
+		});
+	}
+	else
+	{
+		// Browser doesn't support Geolocation
+		handleLocationError(false, infoWindow, map.getCenter());
+	}
+
+} //end initMap
+
+function handleLocationError(browserHasGeolocation, infoWindow, pos)
 {
-  infoWindow.setPosition(pos);
-  infoWindow.setContent(browserHasGeolocation ?
-                        'Error: The Geolocation service failed.' :
-                        'Error: Your browser doesn\'t support geolocation.');
-  infoWindow.open(map);
+	infoWindow.setPosition(pos);
+	infoWindow.setContent(browserHasGeolocation ?
+		'Error: The Geolocation service failed.' :
+		'Error: Your browser doesn\'t support geolocation.');
+	infoWindow.open(map);
 }
 
 //Makes the ajax call for the nearest bus stops
 function getBuses(pos)
 {
 
-  var perPage = 1000;     //Results per query
-  var radius = 1000;    //Radius around point
+	var perPage = 1000; //Results per query
+	var radius = 1000; //Radius around point
 
-  var lng = pos["lng"];
-  var lat = pos["lat"];
+	var lng = pos["lng"];
+	var lat = pos["lat"];
 
-  $.ajax(
-  {
-    url: transitlandURL, 
-    type: "GET",
-    data: 
-    {
-      lat: lat,
-      lon: lng,
-      r: radius,
-      per_page: perPage
-    },
-    success: processData,
-    error: AjaxError
-  }); 
+	$.ajax(
+	{
+		url: transitlandURL,
+		type: "GET",
+		data:
+		{
+			lat: lat,
+			lon: lng,
+			r: radius,
+			per_page: perPage
+		},
+		success: processData,
+		error: AjaxError
+	});
 
 
 }
@@ -182,51 +191,53 @@ function getBuses(pos)
 
 function processData(data)
 {
-  console.log(data);
+	console.log(data);
 
-  for (var i = 0; i < data["features"].length; i ++)
-  {
-    var lat = data["features"][i]["geometry"]["coordinates"][1];
-    var lon = data["features"][i]["geometry"]["coordinates"][0];
+	for (var i = 0; i < data["features"].length; i++)
+	{
+		var lat = data["features"][i]["geometry"]["coordinates"][1];
+		var lon = data["features"][i]["geometry"]["coordinates"][0];
 
-    var stopPos = 
-    {
-      lat: lat,
-      lng: lon
-    };
+		var stopPos = {
+			lat: lat,
+			lng: lon
+		};
 
-    var title = data["features"][i]["properties"]["name"];
-	
-	//Collect Route info
-	var routeList = data.features[i].properties.routes_serving_stop;
-	var routeNums = "";
-	var routeIds = "";
-	$.each(routeList, function(index, item){
-		routeNums += item.route_name + " ";
-		routeIds += item.route_onestop_id + " ";
-	});
-	
-	var osm_way_id = data.features[i].properties.tags.osm_way_id;
-	var onestop_id = data.features[i].properties.onestop_id;
+		var title = data["features"][i]["properties"]["name"];
 
-//--------------- Pin- comment this out for infoWindow
+		//Collect Route info
+		var routeList = data.features[i].properties.routes_serving_stop;
+		var routeNums = "";
+		var routeIds = "";
+		$.each(routeList, function(index, item)
+		{
+			routeNums += item.route_name + " ";
+			routeIds += item.route_onestop_id + " ";
+		});
 
-	//See function for details
-	placeStopMarker(stopPos, title, osm_way_id, onestop_id, routeIds, routeNums);
-	
-//--------------------
+		var osm_way_id = data.features[i].properties.tags.osm_way_id;
+		var onestop_id = data.features[i].properties.onestop_id;
 
-    //This is for the info windows, just uncomment the following and comment out the marker above
-	/*
+		//--------------- Pin- comment this out for infoWindow
+
+		//See function for details
+		placeStopMarker(stopPos, title, osm_way_id, onestop_id, routeIds, routeNums);
+
+		//--------------------
+
+		//This is for the info windows, just uncomment the following and comment out the marker above
+		/*
     var stop = new google.maps.InfoWindow;
     stop.setPosition(stopPos);
     stop.setContent(title);
     stop.open(map);
 	*/
 
-  }
-  markerCluster = new MarkerClusterer(map, markers,
-            {imagePath: "./MarkerClusterer/images/m"});
+	}
+	markerCluster = new MarkerClusterer(map, markers,
+	{
+		imagePath: "./MarkerClusterer/images/m"
+	});
 
 }
 
@@ -234,65 +245,68 @@ function processData(data)
 //to be used to create a busStop marker with related events to display info: click & mouseover
 function placeStopMarker(stopPos, title, osm_way_id, onestop_id, routeIds, routeNums)
 {
-	
+
 	//Creates the initial Marker with provided information
 	var marker = new google.maps.Marker(
-    {
-      map:map,
-      draggable:false,
-      animation: google.maps.Animation.DROP,
-      position:stopPos,
-      title: title,
-	  customInfo: "osm_way_id: " + osm_way_id + " | Route #'s: " + routeNums + " | Route Ids: " + routeIds + " | onestop_id: " + onestop_id
-    });
+	{
+		map: map,
+		draggable: false,
+		animation: google.maps.Animation.DROP,
+		position: stopPos,
+		title: title,
+		customInfo: "osm_way_id: " + osm_way_id + " | Route #'s: " + routeNums + " | Route Ids: " + routeIds + " | onestop_id: " + onestop_id
+	});
 
-    //This is to set up the click event for selecting a stop
-    //marker.addListener('click', stopClicked);
-	google.maps.event.addListener(marker, "click", function(event){
+	//This is to set up the click event for selecting a stop
+	//marker.addListener('click', stopClicked);
+	google.maps.event.addListener(marker, "click", function(event)
+	{
 		console.log("Lat: " + this.position.lat());
 		console.log("Lng: " + this.position.lng());
 		console.log(this.customInfo);
-		
+
 		var infoDiv = $("#infoDiv");
 		$("#lower").html("<p>" + this.customInfo + "</p>");
 		$(infoDiv).show();
 	});
-	
+
 	//These mouseover/mouseout events deal with displaying info pertaining to the Stop above the marker
-	google.maps.event.addListener(marker, "mouseover", function(event){
+	google.maps.event.addListener(marker, "mouseover", function(event)
+	{
 		infoWindow.setContent(this.customInfo);
-		infoWindow.open(map,this);
+		infoWindow.open(map, this);
 	});
-	google.maps.event.addListener(marker, "mouseout", function(event){
+	google.maps.event.addListener(marker, "mouseout", function(event)
+	{
 		infoWindow.close();
 	});
-	
-    markers.push(marker);
+
+	markers.push(marker);
 }
 
 function AjaxError(data)
 {
-  console.log(data);
-  console.log("AjaxError was hit");
+	console.log(data);
+	console.log("AjaxError was hit");
 }
 
 function stopClicked(data, other)
 {
-  
+
 }
 
 function dragFunction(data)
 {
 	var pos = {
-        lat: home.getPosition().lat(),
-        lng: home.getPosition().lng()
-    };
-    
-    for (var i = 0; i < markers.length; i++) 
-    {
-        markers[i].setMap(null);
-    }
-    markers = [];
+		lat: home.getPosition().lat(),
+		lng: home.getPosition().lng()
+	};
 
-    getBuses(pos);
+	for (var i = 0; i < markers.length; i++)
+	{
+		markers[i].setMap(null);
+	}
+	markers = [];
+
+	getBuses(pos);
 }
