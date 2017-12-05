@@ -29,12 +29,11 @@ function init()
 	
 	
 	/*TEST*/
-	var perPage = 50;
+	var perPage = 2000;
 	$.ajax({url:"https://transit.land/api/v1/stops",
 			cache: false,
 			type: "GET",
 			data: {
-				route_onestop_id: "r-c2kq-165",
 				served_by: "o-c2kx-spokanetransitauthority",
 				per_page: perPage
 			},
@@ -56,10 +55,24 @@ function stopsForRoute(data)
 {
 	console.log(data);
 	
+	var desiredRouteId = "r-c2kr-124";
+	
 	var points = [];
 	for(coordinate of data.stops)
 	{
-	  points.push(coordinate.geometry.coordinates[1] + "," + coordinate.geometry.coordinates[0]);
+		var done = false;
+		for(stopId of coordinate.routes_serving_stop)
+		{
+			if(!done)
+			{
+				if(stopId.route_onestop_id === desiredRouteId)
+				{
+					points.push(coordinate.geometry.coordinates[1] + "," + coordinate.geometry.coordinates[0]);
+	
+					done = true;
+				}
+			}
+		}
 	}
 	
 	var stringPoints = points.join("|");
