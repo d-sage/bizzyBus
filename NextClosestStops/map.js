@@ -1,7 +1,10 @@
 //------------------------------------------------------------------------------------
 //This example is taken from google and adapted
 //Original: https://developers.google.com/maps/documentation/javascript/geolocation
+//Also, sorry for the horrible formatting, thank google and cut/paste
 //------------------------------------------------------------------------------------
+
+//Marker Clusterer files obtained from google maps v3 utility library: https://github.com/googlemaps/v3-utility-library
 
 // Note: This example requires that you consent to location sharing when
 // prompted by your browser. If you see the error "The Geolocation service
@@ -24,12 +27,14 @@ function init()
 		console.log(evt);
 		$("#map").height($(window).height());
 	});
+
 }
 
 var transitlandURL = "https://transit.land/api/v1/stops.geojson";
 
 var map, infoWindow, home;
 var markers = [];
+var markerCluster;
 function initMap() 
 {
   map = new google.maps.Map(document.getElementById('map'), 
@@ -71,7 +76,52 @@ function initMap()
       //console.log(map.getZoom());
       map.setCenter(pos);
 
-      getBuses(pos);
+
+      // Create the search box and link it to the UI element
+      var input = document.getElementById('pac-input');
+      var searchBox = new google.maps.places.SearchBox(input);
+      map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+      // Bias the SearchBox results towards current map's viewport.
+      map.addListener('bounds_changed', function() {
+      	searchBox.setBounds(map.getBounds());
+      });
+
+      // Listen for the event fired when the user selects a prediction and retrieve
+      // more details for that place.
+      searchBox.addListener('places_changed', function() {
+          var places = searchBox.getPlaces();
+
+          if (places.length == 0) {
+            return;
+          }
+
+          // For each place, get the icon, name and location.
+          var bounds = new google.maps.LatLngBounds();
+          places.forEach(function(place) {
+            if (!place.geometry) {
+              console.log("Returned place contains no geometry");
+              return;
+            }
+            
+
+	        home.setPosition(place.geometry.location);
+	        map.setCenter(place.geometry.location);
+
+	        for (var i = 0; i < markers.length; i++) 
+    		{
+        		markers[i].setMap(null);
+    		}
+
+    		markers = [];
+
+	        getBuses(place.geometry.location);
+            
+          });
+          
+        });
+      
+      	getBuses(pos);
 
     }, function() 
     {
@@ -119,6 +169,7 @@ function getBuses(pos)
     success: processData,
     error: AjaxError
   }); 
+
 
 }
 
@@ -174,7 +225,8 @@ function processData(data)
 	*/
 
   }
-
+  markerCluster = new MarkerClusterer(map, markers,
+            {imagePath: "./MarkerClusterer/images/m"});
 
 }
 
@@ -244,5 +296,3 @@ function dragFunction(data)
 
     getBuses(pos);
 }
-
-
