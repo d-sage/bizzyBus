@@ -271,6 +271,7 @@ function initMap()
 					}
 
 					markers = [];
+					markerCluster.clearMarkers();
 
 					getBuses(place.geometry.location);
 
@@ -455,6 +456,7 @@ function dragFunction(data)
 		markers[i].setMap(null);
 	}
 	markers = [];
+	markerCluster.clearMarkers();
 
 	getBuses(pos);
 }
