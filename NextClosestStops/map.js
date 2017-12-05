@@ -55,7 +55,7 @@ function stopsForRoute(data)
 {
 	console.log(data);
 	
-	var desiredRouteId = "r-c2kr-124";
+	var desiredRouteId = "r-c2kqh-68";
 	
 	var points = [];
 	for(coordinate of data.stops)
@@ -99,9 +99,42 @@ function plotRoute(data)
 {
 	console.log(data);
 	
-    processSnapToRoadResponse(data);
+	/*
+	var tempPoints = [];
+	for(snapPoint of data.snappedPoints)
+	{
+		tempPoints.push(snapPoint.location.latitude + "," + snapPoint.location.longitude);
+	}
+	
+	var stringPoints = tempPoints.join("|");
+	
+	console.log(stringPoints);
+	
+	
+	$.ajax({
+		url: 'https://roads.googleapis.com/v1/nearestRoads',
+		type: "GET",
+		data:
+		{
+			key: apiKey,
+			points: stringPoints
+		},
+		success: test,
+		error: AjaxError
+	});
+	*/
+	
+	processSnapToRoadResponse(data);
     drawSnappedPolyline();
 	
+}
+
+function test(data)
+{
+	console.log(data);
+	
+	processSnapToRoadResponse(data);
+    drawSnappedPolyline();
 }
 
 // Store snapped polyline returned by the snap-to-road service.
