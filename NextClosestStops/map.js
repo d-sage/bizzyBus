@@ -87,10 +87,10 @@ function initMap()
 	{
 		center:
 		{
-			lat: -34.397,
-			lng: 150.644
+			lat: 47.6588,
+			lng: -117.4260
 		},
-		zoom: 6
+		zoom: 15
 	});
 
 	infoWindow = new google.maps.InfoWindow;
