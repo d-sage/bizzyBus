@@ -27,14 +27,13 @@ function init()
 		$("#map").height($(window).height());
 	});
 
-	$("#nextBusNum").change(busNumChanged);
-	$("#routeSelect").change(routeSelectChanged);
-
+	$(".nextBusSelect").change(nextBusSelectChanged);
 }
 
-
-
-
+/*
+Unused method
+Purpose: Most all code is written to be able to place Stops along a given route
+*/
 function stopsForRoute(data)
 {
 	console.log(data);
@@ -62,17 +61,6 @@ function stopsForRoute(data)
 	var stringPoints = points.join("|");
 	
 	console.log(stringPoints);
-	
-	
-	/*
-	-
-	-
-	Place Stops Along Route
-	-
-	-
-	*/
-	
-	
 }
 
 /*Globals>>>*/
@@ -215,7 +203,6 @@ function getBuses(pos)
 //ProcessData creates the pins for the stops if the JSON comes back properly
 //Currently it just sets the "name" attribute as a pop-up title
 //It can be changed to a written out message of the name instead of the pin as well, either should be clickable
-
 function processData(data)
 {
 	
@@ -244,14 +231,12 @@ function processData(data)
 		var osm_way_id = data.features[i].properties.tags.osm_way_id;
 		var onestop_id = data.features[i].properties.onestop_id;
 
-		//--------------- Pin- comment this out for infoWindow
-
-		//See function for details
+		
+		//*See function for details
 		placeStopMarker(stopPos, title, onestop_id, routeIds.join(","), routeNums.join(","));
 
-		//--------------------
-		
 	}
+	
 	markerCluster = new MarkerClusterer(map, markers,
 	{
 		imagePath: "./MarkerClusterer/images/m"
@@ -276,18 +261,16 @@ function placeStopMarker(stopPos, title, onestop_id, routeIds, routeNums)
 	});
 
 	//This is to set up the click event for selecting a stop
-	//marker.addListener('click', stopClicked);
 	google.maps.event.addListener(marker, "click", function(event)
 	{
 		curMarker = this;
-		
-		var infoDiv = $("#infoDiv");
 		
 		clearLowerInfoDiv();
 		
 		var splitData = this.customInfo.split("|");
 		
-		
+		//Populate the routeSelect Element with the routes associated
+		//with the given/clicked stop
 		var routesSelect = $("#routeSelect");
 		$(routesSelect).empty();
 		$(routesSelect).append($('<option>', {
@@ -305,21 +288,8 @@ function placeStopMarker(stopPos, title, onestop_id, routeIds, routeNums)
 			}));
 		});
 		
-		
-		$("#lower").html("<label class='lblDiv'>~Routes Served: </label><p>" + splitData[0] + "<br /></p>");
-		$(infoDiv).show();
-		
-		var curTime = getCurrentTime();
-		
-		var busNum = $("#nextBusNum").val();
-		
-		var stopID = splitData[2];
-		
-		var routeID = $("#routeSelect").val();
-		if(routeID === "null")
-			routeID = null;
-		
-		getNextBuses(busNum, curTime, stopID, routeID);
+		//*See function for details
+		displayNewInfoData(splitData);
 		
 	});
 
@@ -337,52 +307,38 @@ function placeStopMarker(stopPos, title, onestop_id, routeIds, routeNums)
 	markers.push(marker);
 }
 
-function routeSelectChanged(evt)
+//Entry point to re-populating the nextBuses Info when
+//selecting a new option from one of the Select Elements
+function nextBusSelectChanged(evt)
 {
-	var infoDiv = $("#infoDiv");
+	
+	clearLowerInfoDiv();
 		
-		clearLowerInfoDiv();
+	var splitData = curMarker.customInfo.split("|");
 		
-		var splitData = curMarker.customInfo.split("|");
+	displayNewInfoData(splitData);
 		
-		$("#lower").html("<label class='lblDiv'>~Routes Served: </label><p>" + splitData[0] + "<br /></p>");
-		$(infoDiv).show();
-		
-		var curTime = getCurrentTime();
-		
-		var busNum = $("#nextBusNum").val();
-		
-		var stopID = splitData[2];
-		
-		var routeID = $("#routeSelect").val();
-		if(routeID === "null")
-			routeID = null;
-		
-		getNextBuses(busNum, curTime, stopID, routeID);
 }
 
-function busNumChanged(evt)
+//The function that gets the neccessary data to send to
+//the 'getNextBuses' function
+function displayNewInfoData(splitData)
 {
 	var infoDiv = $("#infoDiv");
+	$("#lower").html("<label class='lblDiv'>~Routes Served: </label><p>" + splitData[0] + "<br /></p>");
+	$(infoDiv).show();
 		
-		clearLowerInfoDiv();
+	var curTime = getCurrentTime();
 		
-		var splitData = curMarker.customInfo.split("|");
+	var busNum = $("#nextBusNum").val();
+	
+	var stopID = splitData[2];
 		
-		$("#lower").html("<label class='lblDiv'>~Routes Served: </label><p>" + splitData[0] + "<br /></p>");
-		$(infoDiv).show();
+	var routeID = $("#routeSelect").val();
+	if(routeID === "null")
+		routeID = null;
 		
-		var curTime = getCurrentTime();
-		
-		var busNum = $("#nextBusNum").val();
-		
-		var stopID = splitData[2];
-		
-		var routeID = $("#routeSelect").val();
-		if(routeID === "null")
-			routeID = null;
-		
-		getNextBuses(busNum, curTime, stopID, routeID);
+	getNextBuses(busNum, curTime, stopID, routeID);
 }
 
 function getCurrentTime()
@@ -390,6 +346,12 @@ function getCurrentTime()
 	var time = new Date();
 	
 	return time;
+}
+
+function clearLowerInfoDiv()
+{
+	//Clear the HTML
+	$("#lower").html("");
 }
 
 //get the next buses for a given stop, option to search for next time of given route; 
@@ -406,7 +368,7 @@ function getNextBuses(busNum, curTime, stopID, routeID)
 	{
 		//get stop times, create array for next buses
 		var stops = JSON.parse(JSON.stringify(data)).schedule_stop_pairs;
-		var nextBuses = new Array(busNum);
+		var nextBuses = new Array();
 		var busFound = false;
 		var stopTime = new Date();
 		var foundTime = new Date();
@@ -632,10 +594,4 @@ function browserLocationFail(error)
 
 	}
 	handleLocationError(true, infoWindow, map.getCenter());
-}
-
-function clearLowerInfoDiv()
-{
-	//Clear the HTML
-	$("#lower").html("");
 }
