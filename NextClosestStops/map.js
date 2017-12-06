@@ -27,6 +27,9 @@ function init()
 		$("#map").height($(window).height());
 	});
 
+	$("#nextBusNum").change(busNumChanged);
+	$("#routeSelect").change(routeSelectChanged);
+
 }
 
 
@@ -79,6 +82,7 @@ var apiKey = "AIzaSyBbNcTh39hZiJLtvHEvWCHDtfi8ko19ZWw";
 var map, infoWindow, home;
 var markers = [];
 var markerCluster = null;
+var curMarker;
 /*Globals<<<*/
 
 function initMap()
@@ -229,21 +233,23 @@ function processData(data)
 
 		//Collect Route info
 		var routeList = data.features[i].properties.routes_serving_stop;
-		var routeNums = "";
-		var routeIds = "";
+		var routeNums = [];
+		var routeIds = [];
 		$.each(routeList, function(index, item)
 		{
-			routeNums += item.route_name + " ";
-			routeIds += item.route_onestop_id + " ";
+			routeNums.push(item.route_name);
+			routeIds.push(item.route_onestop_id);
 		});
 
 		var osm_way_id = data.features[i].properties.tags.osm_way_id;
 		var onestop_id = data.features[i].properties.onestop_id;
 
+		//--------------- Pin- comment this out for infoWindow
 
 		//See function for details
-		placeStopMarker(stopPos, title, onestop_id, routeIds, routeNums);
+		placeStopMarker(stopPos, title, onestop_id, routeIds.join(","), routeNums.join(","));
 
+		//--------------------
 		
 	}
 	markerCluster = new MarkerClusterer(map, markers,
@@ -273,6 +279,7 @@ function placeStopMarker(stopPos, title, onestop_id, routeIds, routeNums)
 	//marker.addListener('click', stopClicked);
 	google.maps.event.addListener(marker, "click", function(event)
 	{
+		curMarker = this;
 		
 		var infoDiv = $("#infoDiv");
 		
@@ -280,16 +287,37 @@ function placeStopMarker(stopPos, title, onestop_id, routeIds, routeNums)
 		
 		var splitData = this.customInfo.split("|");
 		
-		$("#lower").html("<p>Routes Served: " + splitData[0] + "<br /></p>");
+		
+		var routesSelect = $("#routeSelect");
+		$(routesSelect).empty();
+		$(routesSelect).append($('<option>', {
+				value: 'null',
+				text: "All Routes"
+		}));
+		
+		var idsArray = splitData[1].split(",");
+		$.each(idsArray, function(index, item){
+			var splitId = item.split("-");
+			var size = splitId.length;
+			$(routesSelect).append($('<option>', {
+				value: item,
+				text: "Route " + splitId[size-1]
+			}));
+		});
+		
+		
+		$("#lower").html("<label class='lblDiv'>~Routes Served: </label><p>" + splitData[0] + "<br /></p>");
 		$(infoDiv).show();
 		
 		var curTime = getCurrentTime();
 		
-		var busNum = 3;
+		var busNum = $("#nextBusNum").val();
 		
 		var stopID = splitData[2];
 		
-		var routeID = null;
+		var routeID = $("#routeSelect").val();
+		if(routeID === "null")
+			routeID = null;
 		
 		getNextBuses(busNum, curTime, stopID, routeID);
 		
@@ -307,6 +335,54 @@ function placeStopMarker(stopPos, title, onestop_id, routeIds, routeNums)
 	});
 
 	markers.push(marker);
+}
+
+function routeSelectChanged(evt)
+{
+	var infoDiv = $("#infoDiv");
+		
+		clearLowerInfoDiv();
+		
+		var splitData = curMarker.customInfo.split("|");
+		
+		$("#lower").html("<label class='lblDiv'>~Routes Served: </label><p>" + splitData[0] + "<br /></p>");
+		$(infoDiv).show();
+		
+		var curTime = getCurrentTime();
+		
+		var busNum = $("#nextBusNum").val();
+		
+		var stopID = splitData[2];
+		
+		var routeID = $("#routeSelect").val();
+		if(routeID === "null")
+			routeID = null;
+		
+		getNextBuses(busNum, curTime, stopID, routeID);
+}
+
+function busNumChanged(evt)
+{
+	var infoDiv = $("#infoDiv");
+		
+		clearLowerInfoDiv();
+		
+		var splitData = curMarker.customInfo.split("|");
+		
+		$("#lower").html("<label class='lblDiv'>~Routes Served: </label><p>" + splitData[0] + "<br /></p>");
+		$(infoDiv).show();
+		
+		var curTime = getCurrentTime();
+		
+		var busNum = $("#nextBusNum").val();
+		
+		var stopID = splitData[2];
+		
+		var routeID = $("#routeSelect").val();
+		if(routeID === "null")
+			routeID = null;
+		
+		getNextBuses(busNum, curTime, stopID, routeID);
 }
 
 function getCurrentTime()
@@ -389,7 +465,7 @@ function getNextBuses(busNum, curTime, stopID, routeID)
 					results = results + nextBuses[i] + '<br>';
 			}
 			
-			$("#lower").html($("#lower").html() + "<p>" + results + "</p>");
+			$("#lower").html($("#lower").html() + "<label class='lblDiv'>~Next Busses: </label><p>" + results + "</p>");
 		}
 		else
 		{
@@ -423,6 +499,101 @@ function dragFunction(data)
 
 function locationSuccess(position)
 {
+	
+	if(position["location"])
+	{
+		var pos = {
+			lat: position["location"]["lat"],
+			lng: position["location"]["lng"]
+		};
+	}
+	else
+	{
+		var pos = {
+			lat: position.coords.latitude,
+			lng: position.coords.longitude
+		};
+	}
+
+	
+
+	//console.log(pos);
+
+	home = new google.maps.Marker(
+	{
+		map: map,
+		draggable: true,
+		animation: google.maps.Animation.DROP,
+		position: pos,
+		icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+		title: "Current Location"
+	});
+
+
+	//This is for the drag event, its not implemented yet
+	google.maps.event.addListener(home, 'dragend', dragFunction);
+
+
+	map.setZoom(15);
+	//console.log(map.getZoom());
+	map.setCenter(pos);
+
+
+	// Create the search box and link it to the UI element
+	var input = document.getElementById('pac-input');
+	var searchBox = new google.maps.places.SearchBox(input);
+	map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+	// Bias the SearchBox results towards current map's viewport.
+	map.addListener('bounds_changed', function()
+	{
+		searchBox.setBounds(map.getBounds());
+	});
+
+	// Listen for the event fired when the user selects a prediction and retrieve
+	// more details for that place.
+	searchBox.addListener('places_changed', function()
+	{
+		var places = searchBox.getPlaces();
+
+		if (places.length == 0)
+		{
+			return;
+		}
+
+		// For each place, get the icon, name and location.
+		var bounds = new google.maps.LatLngBounds();
+		places.forEach(function(place)
+		{
+			if (!place.geometry)
+			{
+				console.log("Returned place contains no geometry");
+				return;
+			}
+
+
+			home.setPosition(place.geometry.location);
+			map.setCenter(place.geometry.location);
+
+			for (var i = 0; i < markers.length; i++)
+			{
+				markers[i].setMap(null);
+			}
+
+			markers = [];
+			markerCluster.clearMarkers();
+
+			getBuses(place.geometry.location);
+
+		});
+
+	});
+
+	getBuses(pos);
+	
+	
+	//------------------Dont know which is most current-------------------
+	/*
 	if(position["location"])
 	{
 		var pos = {
@@ -450,7 +621,7 @@ function locationSuccess(position)
 	map.setCenter(pos);
 
 	getBuses(pos);
-
+	*/
 }
 
 function browserLocationFail(error)
