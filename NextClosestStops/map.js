@@ -154,8 +154,7 @@ function getBuses(pos)
 
 function processData(data)
 {
-	console.log(data);
-
+	
 	for (var i = 0; i < data["features"].length; i++)
 	{
 		var lat = data["features"][i]["geometry"]["coordinates"][1];
@@ -166,7 +165,7 @@ function processData(data)
 			lng: lon
 		};
 
-		var title = data["features"][i]["properties"]["name"];
+		var title = data.features[i].properties.tags.stop_desc;
 
 		//Collect Route info
 		var routeList = data.features[i].properties.routes_serving_stop;
@@ -184,10 +183,10 @@ function processData(data)
 		//--------------- Pin- comment this out for infoWindow
 
 		//See function for details
-		placeStopMarker(stopPos, title, osm_way_id, onestop_id, routeIds, routeNums);
+		placeStopMarker(stopPos, title, onestop_id, routeIds, routeNums);
 
 		//--------------------
-
+		
 	}
 	markerCluster = new MarkerClusterer(map, markers,
 	{
@@ -198,7 +197,7 @@ function processData(data)
 
 //This function allows for stopPos(lat/lng) and other components
 //to be used to create a busStop marker with related events to display info: click & mouseover
-function placeStopMarker(stopPos, title, osm_way_id, onestop_id, routeIds, routeNums)
+function placeStopMarker(stopPos, title, onestop_id, routeIds, routeNums)
 {
 
 	//Creates the initial Marker with provided information
@@ -209,51 +208,39 @@ function placeStopMarker(stopPos, title, osm_way_id, onestop_id, routeIds, route
 		animation: google.maps.Animation.DROP,
 		position: stopPos,
 		title: title,
-		customInfo: "osm_way_id: " + osm_way_id + " | Route #'s: " + routeNums + " | Route Ids: " + routeIds + " | onestop_id: " + onestop_id
+		customInfo: routeNums + "|" + routeIds + "|" + onestop_id
 	});
 
 	//This is to set up the click event for selecting a stop
 	//marker.addListener('click', stopClicked);
 	google.maps.event.addListener(marker, "click", function(event)
 	{
-		console.log("Lat: " + this.position.lat());
-		console.log("Lng: " + this.position.lng());
-		console.log(this.customInfo);
-
+		
 		var infoDiv = $("#infoDiv");
-		$("#lower").html("<p>" + this.customInfo + "</p>");
+		
+		clearLowerInfoDiv();
+		
+		var splitData = this.customInfo.split("|");
+		
+		$("#lower").html("<p>Routes Served: " + splitData[0] + "<br /></p>");
 		$(infoDiv).show();
 		
+		var curTime = getCurrentTime();
 		
+		var busNum = 3;
 		
+		var stopID = splitData[2];
 		
+		var routeID = null;
 		
-		
-		/*
-		-
-		-
-		-
-		Place code for marker click event here
-		Change anything you want
-		-
-		-
-		-		
-		*/
-		
-		
-		
-		
-		
-		
-		
-		
+		getNextBuses(busNum, curTime, stopID, routeID);
 		
 	});
 
 	//These mouseover/mouseout events deal with displaying info pertaining to the Stop above the marker
 	google.maps.event.addListener(marker, "mouseover", function(event)
 	{
-		infoWindow.setContent(this.customInfo);
+		infoWindow.setContent(this.title);
 		infoWindow.open(map, this);
 	});
 	google.maps.event.addListener(marker, "mouseout", function(event)
@@ -262,6 +249,95 @@ function placeStopMarker(stopPos, title, osm_way_id, onestop_id, routeIds, route
 	});
 
 	markers.push(marker);
+}
+
+function getCurrentTime()
+{
+	var time = new Date();
+	
+	return time;
+}
+
+//get the next buses for a given stop, option to search for next time of given route; 
+//busNum = number of buses to return, curTime = time to compare against,
+//stopID = the origin_onestop_id of the stop, (optional) routeID = route_onestop_id of a given route
+function getNextBuses(busNum, curTime, stopID, routeID) 
+{	
+	if(routeID == null)
+		var apiCall = "https://transit.land/api/v1/schedule_stop_pairs?per_page=10000&operator_onestop_id=o-c2kx-spokanetransitauthority&origin_onestop_id=" + stopID;
+	else
+		var apiCall = "https://transit.land/api/v1/schedule_stop_pairs?per_page=10000&operator_onestop_id=o-c2kx-spokanetransitauthority&origin_onestop_id=" + stopID + "&route_onestop_id=" + routeID;
+	
+	$.get(apiCall, function(data, status)
+	{
+		//get stop times, create array for next buses
+		var stops = JSON.parse(JSON.stringify(data)).schedule_stop_pairs;
+		var nextBuses = new Array(busNum);
+		var busFound = false;
+		var stopTime = new Date();
+		var foundTime = new Date();
+		var foundTimeStr = "";
+		
+		//check each stop time
+		for(var i = 0; i < stops.length; i++)
+		{
+			//parse stop time 
+			stopTime.setHours(parseInt(stops[i].origin_arrival_time.substr(0,2)));
+			stopTime.setMinutes(parseInt(stops[i].origin_arrival_time.substr(3,5)));
+			stopTime.setSeconds(parseInt(stops[i].origin_arrival_time.substr(6,7)));
+			
+			//check to make sure this stop time is available on given day
+			if(stops[i].service_days_of_week[curTime.getDay()])
+			{	//check if stopTime is in the future
+				if(stopTime > curTime)
+				{	//check to see if stopTime is sooner than those already found
+					for(var j = 0; j < busNum; j++)
+					{	
+						if(nextBuses[j] != null)
+						{
+							foundTimeStr = nextBuses[j].substr(9, nextBuses[j].length);
+							foundTime.setHours(parseInt(foundTimeStr.substr(0,2)));
+							foundTime.setMinutes(parseInt(foundTimeStr.substr(3,5)));
+							foundTime.setSeconds(parseInt(foundTimeStr.substr(6,7)));
+							
+							//if so add it to list
+							if(stopTime < foundTime)
+							{
+								var routeNum = stops[i].route_onestop_id.split("-");
+								nextBuses[j] = "Route " + routeNum[routeNum.length - 1] + " " + stops[i].origin_arrival_time;
+								busFound = true;
+								break;
+							}
+						}
+						else
+						{	//if so add it to list
+							var routeNum = stops[i].route_onestop_id.split("-");
+							nextBuses[j] = "Route " + routeNum[routeNum.length - 1] + " " + stops[i].origin_arrival_time;
+							busFound = true;
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		if(busFound == true)
+		{
+			var results = "";
+			
+			for(var i = 0; i < nextBuses.length; i++)
+			{
+				if(nextBuses[i] != null)
+					results = results + nextBuses[i] + '<br>';
+			}
+			
+			$("#lower").html($("#lower").html() + "<p>" + results + "</p>");
+		}
+		else
+		{
+			$("#lower").html($("#lower").html() + "<p>Sorry, no buses found</p>");
+		}
+	});	
 }
 
 function AjaxError(data)
@@ -390,4 +466,10 @@ function browserLocationFail(error)
 
 	}
 	handleLocationError(true, infoWindow, map.getCenter());
+}
+
+function clearLowerInfoDiv()
+{
+	//Clear the HTML
+	$("#lower").html("");
 }

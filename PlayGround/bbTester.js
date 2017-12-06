@@ -37,7 +37,7 @@ function getMiscClick($evt)
 {
 	
 	var $keyValues = {};
-	$.ajax({url:"https://transit.land/api/v1/stops?route_onestop_id=r-c2kqh-68",
+	$.ajax({url:"https://transit.land/api/v1/routes?operated_by=o-c2kx-spokanetransitauthority",
 			cache: false,
 			type: "GET",
 			data: $keyValues,
@@ -49,6 +49,16 @@ function getMiscClick($evt)
 function getMiscSuccess($data)
 {
 	console.log($data);
+	
+	var string = "";
+	for(route of $data.routes)
+	{
+		
+		string += "<option value=''>" + route.onestop_id + "</option>\n";
+		
+	}
+	
+	console.log(string);
 	
 	//var $stops = $data.features;
 	
