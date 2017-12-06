@@ -335,20 +335,20 @@ h1, h2, h3, h4, h5, h6 {font-weight:normal;margin:0 0 15px;}
 	2)header Start
 ===========================*/
 
-#header{padding: 40px 0px}
+#header{padding: 40px 0px; background: #2D312F;}
 .block-left{}
 
 #header .block-right{}
 .contact-area{text-align: right; margin-top: 10px;}
 .contact-area ul{margin: 0px; padding: 0px; list-style: none;}
-.contact-area ul li{display: inline-block; margin-left: 40px; color:#3C3D42; font-size: 17px; font-family: 'Raleway', sans-serif; font-weight: 400px; }
+.contact-area ul li{display: inline-block; margin-left: 40px; color:#8C9494; font-size: 17px; font-family: 'Raleway', sans-serif; font-weight: 400px; }
 .contact-area ul li i{margin-right: 10px; font-size: 18px; }
 
 
 .nav-logo{margin-right: 30px; margin-top: 12px}
 .navbar-default{background: none; border: none;}
-.navbar-default .navbar-nav > li > a{ color:#8B9090;font-family: 'Raleway', sans-serif; font-weight: 400px; font-size: 14px;}
-.navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:hover, .navbar-default .navbar-nav > .active > a:focus{background: none; color:#3C3D42}
+.navbar-default .navbar-nav > li > a{ color:#8C9494;font-family: 'Raleway', sans-serif; font-weight: 400px; font-size: 14px;}
+.navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:hover, .navbar-default .navbar-nav > .active > a:focus{background: none; color:#8C9000;}
 
 
 
