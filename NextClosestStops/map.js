@@ -78,7 +78,7 @@ var apiKey = "AIzaSyBbNcTh39hZiJLtvHEvWCHDtfi8ko19ZWw";
 
 var map, infoWindow, home;
 var markers = [];
-var markerCluster;
+var markerCluster = null;
 /*Globals<<<*/
 
 function initMap()
@@ -94,6 +94,68 @@ function initMap()
 	});
 
 	infoWindow = new google.maps.InfoWindow;
+
+	home = new google.maps.Marker(
+	{
+		map: map,
+		draggable: true,
+		animation: google.maps.Animation.DROP,
+		icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+		title: "Current Location"
+	});
+	google.maps.event.addListener(home, 'dragend', dragFunction);
+
+	// Create the search box and link it to the UI element
+	var input = document.getElementById('pac-input');
+	var searchBox = new google.maps.places.SearchBox(input);
+	map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+	// Bias the SearchBox results towards current map's viewport.
+	map.addListener('bounds_changed', function()
+	{
+		searchBox.setBounds(map.getBounds());
+	});
+
+	// Listen for the event fired when the user selects a prediction and retrieve
+	// more details for that place.
+	searchBox.addListener('places_changed', function()
+	{
+		var places = searchBox.getPlaces();
+
+		if (places.length == 0)
+		{
+			return;
+		}
+
+		// For each place, get the icon, name and location.
+		var bounds = new google.maps.LatLngBounds();
+		places.forEach(function(place)
+		{
+			if (!place.geometry)
+			{
+				console.log("Returned place contains no geometry");
+				return;
+			}
+
+
+			home.setPosition(place.geometry.location);
+			map.setCenter(place.geometry.location);
+
+			for (var i = 0; i < markers.length; i++)
+			{
+				markers[i].setMap(null);
+			}
+
+			markers = [];
+			
+			if(markerCluster != null)
+				markerCluster.clearMarkers();
+
+			getBuses(place.geometry.location);
+
+		});
+
+	});
 
 	// Try HTML5 geolocation.
 	if (navigator.geolocation)
@@ -150,8 +212,6 @@ function getBuses(pos)
 //Currently it just sets the "name" attribute as a pop-up title
 //It can be changed to a written out message of the name instead of the pin as well, either should be clickable
 
-//I personally prefer the pins. The infoWindows overlap each other
-
 function processData(data)
 {
 	
@@ -180,12 +240,10 @@ function processData(data)
 		var osm_way_id = data.features[i].properties.tags.osm_way_id;
 		var onestop_id = data.features[i].properties.onestop_id;
 
-		//--------------- Pin- comment this out for infoWindow
 
 		//See function for details
 		placeStopMarker(stopPos, title, onestop_id, routeIds, routeNums);
 
-		//--------------------
 		
 	}
 	markerCluster = new MarkerClusterer(map, markers,
@@ -384,75 +442,12 @@ function locationSuccess(position)
 
 	//console.log(pos);
 
-	home = new google.maps.Marker(
-	{
-		map: map,
-		draggable: true,
-		animation: google.maps.Animation.DROP,
-		position: pos,
-		icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
-		title: "Current Location"
-	});
-
-
-	//This is for the drag event, its not implemented yet
-	google.maps.event.addListener(home, 'dragend', dragFunction);
+	home.setPosition(pos);	
 
 
 	map.setZoom(15);
 	//console.log(map.getZoom());
 	map.setCenter(pos);
-
-
-	// Create the search box and link it to the UI element
-	var input = document.getElementById('pac-input');
-	var searchBox = new google.maps.places.SearchBox(input);
-	map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-
-	// Bias the SearchBox results towards current map's viewport.
-	map.addListener('bounds_changed', function()
-	{
-		searchBox.setBounds(map.getBounds());
-	});
-
-	// Listen for the event fired when the user selects a prediction and retrieve
-	// more details for that place.
-	searchBox.addListener('places_changed', function()
-	{
-		var places = searchBox.getPlaces();
-
-		if (places.length == 0)
-		{
-			return;
-		}
-
-		// For each place, get the icon, name and location.
-		var bounds = new google.maps.LatLngBounds();
-		places.forEach(function(place)
-		{
-			if (!place.geometry)
-			{
-				console.log("Returned place contains no geometry");
-				return;
-			}
-
-
-			home.setPosition(place.geometry.location);
-			map.setCenter(place.geometry.location);
-
-			for (var i = 0; i < markers.length; i++)
-			{
-				markers[i].setMap(null);
-			}
-
-			markers = [];
-			markerCluster.clearMarkers();
-
-			getBuses(place.geometry.location);
-
-		});
-
-	});
 
 	getBuses(pos);
 
