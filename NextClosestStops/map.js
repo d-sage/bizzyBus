@@ -98,91 +98,7 @@ function initMap()
 	// Try HTML5 geolocation.
 	if (navigator.geolocation)
 	{
-		navigator.geolocation.getCurrentPosition(function(position)
-		{
-			var pos = {
-				lat: position.coords.latitude,
-				lng: position.coords.longitude
-			};
-
-			console.log(pos);
-
-			home = new google.maps.Marker(
-			{
-				map: map,
-				draggable: true,
-				animation: google.maps.Animation.DROP,
-				position: pos,
-				icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
-				title: "Current Location"
-			});
-
-
-			//This is for the drag event, its not implemented yet
-			google.maps.event.addListener(home, 'dragend', dragFunction);
-
-
-			map.setZoom(15);
-			//console.log(map.getZoom());
-			map.setCenter(pos);
-
-
-			// Create the search box and link it to the UI element
-			var input = document.getElementById('pac-input');
-			var searchBox = new google.maps.places.SearchBox(input);
-			map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
-
-			// Bias the SearchBox results towards current map's viewport.
-			map.addListener('bounds_changed', function()
-			{
-				searchBox.setBounds(map.getBounds());
-			});
-
-			// Listen for the event fired when the user selects a prediction and retrieve
-			// more details for that place.
-			searchBox.addListener('places_changed', function()
-			{
-				var places = searchBox.getPlaces();
-
-				if (places.length == 0)
-				{
-					return;
-				}
-
-				// For each place, get the icon, name and location.
-				var bounds = new google.maps.LatLngBounds();
-				places.forEach(function(place)
-				{
-					if (!place.geometry)
-					{
-						console.log("Returned place contains no geometry");
-						return;
-					}
-
-
-					home.setPosition(place.geometry.location);
-					map.setCenter(place.geometry.location);
-
-					for (var i = 0; i < markers.length; i++)
-					{
-						markers[i].setMap(null);
-					}
-
-					markers = [];
-					markerCluster.clearMarkers();
-
-					getBuses(place.geometry.location);
-
-				});
-
-			});
-
-			getBuses(pos);
-
-		}, function()
-		{
-			handleLocationError(true, infoWindow, map.getCenter());
-		});
+		navigator.geolocation.getCurrentPosition(locationSuccess, browserLocationFail);
 	}
 	else
 	{
@@ -369,4 +285,109 @@ function dragFunction(data)
 	markerCluster.clearMarkers();
 
 	getBuses(pos);
+}
+
+function locationSuccess(position)
+{
+	if(position["location"])
+	{
+		var pos = {
+			lat: position["location"]["lat"],
+			lng: position["location"]["lng"]
+		};
+	}
+	else
+	{
+		var pos = {
+			lat: position.coords.latitude,
+			lng: position.coords.longitude
+		};
+	}
+
+	
+
+	//console.log(pos);
+
+	home = new google.maps.Marker(
+	{
+		map: map,
+		draggable: true,
+		animation: google.maps.Animation.DROP,
+		position: pos,
+		icon: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+		title: "Current Location"
+	});
+
+
+	//This is for the drag event, its not implemented yet
+	google.maps.event.addListener(home, 'dragend', dragFunction);
+
+
+	map.setZoom(15);
+	//console.log(map.getZoom());
+	map.setCenter(pos);
+
+
+	// Create the search box and link it to the UI element
+	var input = document.getElementById('pac-input');
+	var searchBox = new google.maps.places.SearchBox(input);
+	map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+	// Bias the SearchBox results towards current map's viewport.
+	map.addListener('bounds_changed', function()
+	{
+		searchBox.setBounds(map.getBounds());
+	});
+
+	// Listen for the event fired when the user selects a prediction and retrieve
+	// more details for that place.
+	searchBox.addListener('places_changed', function()
+	{
+		var places = searchBox.getPlaces();
+
+		if (places.length == 0)
+		{
+			return;
+		}
+
+		// For each place, get the icon, name and location.
+		var bounds = new google.maps.LatLngBounds();
+		places.forEach(function(place)
+		{
+			if (!place.geometry)
+			{
+				console.log("Returned place contains no geometry");
+				return;
+			}
+
+
+			home.setPosition(place.geometry.location);
+			map.setCenter(place.geometry.location);
+
+			for (var i = 0; i < markers.length; i++)
+			{
+				markers[i].setMap(null);
+			}
+
+			markers = [];
+			markerCluster.clearMarkers();
+
+			getBuses(place.geometry.location);
+
+		});
+
+	});
+
+	getBuses(pos);
+
+}
+
+function browserLocationFail(error)
+{
+	if(error.message.indexOf("Only secure origins are allowed") == 0)
+	{
+			$.post("https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyBbNcTh39hZiJLtvHEvWCHDtfi8ko19ZWw", locationSuccess);
+
+	}
+	handleLocationError(true, infoWindow, map.getCenter());
 }
