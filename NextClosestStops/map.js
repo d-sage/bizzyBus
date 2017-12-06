@@ -26,25 +26,6 @@ function init()
 		console.log(evt);
 		$("#map").height($(window).height());
 	});
-	
-	
-	/*TEST*/
-	var perPage = 2000;
-	$.ajax({url:"https://transit.land/api/v1/stops",
-			cache: false,
-			type: "GET",
-			data: {
-				served_by: "o-c2kx-spokanetransitauthority",
-				per_page: perPage
-			},
-			success: stopsForRoute,
-			dataType: "json"
-	});
-	
-	
-	/*TEST*/
-	
-	
 
 }
 
@@ -80,94 +61,16 @@ function stopsForRoute(data)
 	console.log(stringPoints);
 	
 	
-	$.ajax({
-		url: 'https://roads.googleapis.com/v1/snapToRoads',
-		type: "GET",
-		data:
-		{
-			interpolate: true,
-			key: apiKey,
-			path: stringPoints
-		},
-		success: plotRoute,
-		error: AjaxError
-	});
-	
-}
-
-function plotRoute(data)
-{
-	console.log(data);
-	
 	/*
-	var tempPoints = [];
-	for(snapPoint of data.snappedPoints)
-	{
-		tempPoints.push(snapPoint.location.latitude + "," + snapPoint.location.longitude);
-	}
-	
-	var stringPoints = tempPoints.join("|");
-	
-	console.log(stringPoints);
-	
-	
-	$.ajax({
-		url: 'https://roads.googleapis.com/v1/nearestRoads',
-		type: "GET",
-		data:
-		{
-			key: apiKey,
-			points: stringPoints
-		},
-		success: test,
-		error: AjaxError
-	});
+	-
+	-
+	Place Stops Along Route
+	-
+	-
 	*/
 	
-	processSnapToRoadResponse(data);
-    drawSnappedPolyline();
 	
 }
-
-function test(data)
-{
-	console.log(data);
-	
-	processSnapToRoadResponse(data);
-    drawSnappedPolyline();
-}
-
-// Store snapped polyline returned by the snap-to-road service.
-function processSnapToRoadResponse(data) {
-  snappedCoordinates = [];
-  placeIdArray = [];
-  for (var i = 0; i < data.snappedPoints.length; i++) {
-    var latlng = new google.maps.LatLng(
-        data.snappedPoints[i].location.latitude,
-        data.snappedPoints[i].location.longitude);
-    snappedCoordinates.push(latlng);
-    placeIdArray.push(data.snappedPoints[i].placeId);
-  }
-}
-
-// Draws the snapped polyline (after processing snap-to-road response).
-function drawSnappedPolyline() {
-  var snappedPolyline = new google.maps.Polyline({
-    path: snappedCoordinates,
-    strokeColor: 'red',
-    strokeWeight: 4
-  });
-
-  snappedPolyline.setMap(map);
-  polylines.push(snappedPolyline);
-}
-
-
-
-
-
-
-
 
 /*Globals>>>*/
 var transitlandURL = "https://transit.land/api/v1/stops.geojson";
@@ -176,11 +79,6 @@ var apiKey = "AIzaSyBbNcTh39hZiJLtvHEvWCHDtfi8ko19ZWw";
 var map, infoWindow, home;
 var markers = [];
 var markerCluster;
-
-var drawingManager;
-var placeIdArray = [];
-var polylines = [];
-var snappedCoordinates = [];
 /*Globals<<<*/
 
 function initMap()
@@ -374,14 +272,6 @@ function processData(data)
 
 		//--------------------
 
-		//This is for the info windows, just uncomment the following and comment out the marker above
-		/*
-    var stop = new google.maps.InfoWindow;
-    stop.setPosition(stopPos);
-    stop.setContent(title);
-    stop.open(map);
-	*/
-
 	}
 	markerCluster = new MarkerClusterer(map, markers,
 	{
@@ -417,6 +307,31 @@ function placeStopMarker(stopPos, title, osm_way_id, onestop_id, routeIds, route
 		var infoDiv = $("#infoDiv");
 		$("#lower").html("<p>" + this.customInfo + "</p>");
 		$(infoDiv).show();
+		
+		
+		
+		
+		
+		
+		/*
+		-
+		-
+		-
+		Place code for marker click event here
+		Change anything you want
+		-
+		-
+		-		
+		*/
+		
+		
+		
+		
+		
+		
+		
+		
+		
 	});
 
 	//These mouseover/mouseout events deal with displaying info pertaining to the Stop above the marker
@@ -437,11 +352,6 @@ function AjaxError(data)
 {
 	console.log(data);
 	console.log("AjaxError was hit");
-}
-
-function stopClicked(data, other)
-{
-
 }
 
 function dragFunction(data)
