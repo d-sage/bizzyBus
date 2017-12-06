@@ -25,7 +25,7 @@
 
     #infoDiv {
       position: absolute;
-      background-color: #24e24a;
+      background-color: #16af3d;
       top: 30px;
       right: 10px;
       z-index: 99;
@@ -46,6 +46,19 @@
 	select{
 		margin: 5px;
 	}
+	
+	.rowRoutes{
+		text-align: center;
+	}
+	
+	.rowNumbers{
+		text-align: left;
+	}
+	
+	table{
+		width: 100%;
+	}
+	
 
     /* Taken from https://developers.google.com/maps/documentation/javascript/examples/places-searchbox */
 
@@ -188,6 +201,29 @@
 	 </div>
 
     <div id="lower">
+	
+		<table border="1" id="tblRoutesServed">
+			<thead>
+				<tr>
+					<th>Routes Served</th>
+				</tr>
+			</thead>
+			<tbody id="bodyRoutesServed">
+			
+			</tbody>
+		</table>
+	
+		<table border="1" id="tblNextBuses">
+			<thead>
+				<tr>
+					<th>Next Buses</th>
+				</tr>
+			</thead>
+			<tbody id="bodyNextBuses">
+			
+			</tbody>
+		</table>
+	
 	</div>
 
   </div>

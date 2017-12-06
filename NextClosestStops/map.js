@@ -23,7 +23,6 @@ function init()
 	$("#map").height($(window).height());
 	$(window).resize(function(evt)
 	{
-		console.log(evt);
 		$("#map").height($(window).height());
 	});
 
@@ -36,7 +35,6 @@ Purpose: Most all code is written to be able to place Stops along a given route
 */
 function stopsForRoute(data)
 {
-	console.log(data);
 	
 	var desiredRouteId = "r-c2kqh-68";
 	
@@ -60,7 +58,6 @@ function stopsForRoute(data)
 	
 	var stringPoints = points.join("|");
 	
-	console.log(stringPoints);
 }
 
 /*Globals>>>*/
@@ -125,7 +122,6 @@ function initMap()
 		{
 			if (!place.geometry)
 			{
-				console.log("Returned place contains no geometry");
 				return;
 			}
 
@@ -325,7 +321,13 @@ function nextBusSelectChanged(evt)
 function displayNewInfoData(splitData)
 {
 	var infoDiv = $("#infoDiv");
-	$("#lower").html("<label class='lblDiv'>~Routes Served: </label><p>" + splitData[0] + "<br /></p>");
+	
+	var routeNumsList = splitData[0].split(",");
+	for(num of routeNumsList)
+	{
+		$("#tblRoutesServed tbody").append("<tr class='rowRoutes'><td>" + num + "</td></tr>");
+	}
+	
 	$(infoDiv).show();
 		
 	var curTime = getCurrentTime();
@@ -351,7 +353,8 @@ function getCurrentTime()
 function clearLowerInfoDiv()
 {
 	//Clear the HTML
-	$("#lower").html("");
+	$("#tblRoutesServed > tbody").empty();
+	$("#tblNextBuses > tbody").empty();
 }
 
 //get the next buses for a given stop, option to search for next time of given route; 
@@ -424,22 +427,20 @@ function getNextBuses(busNum, curTime, stopID, routeID)
 			for(var i = 0; i < nextBuses.length; i++)
 			{
 				if(nextBuses[i] != null)
-					results = results + nextBuses[i] + '<br>';
+					$("#tblNextBuses tbody").append("<tr class='rowNumbers'><td>" + nextBuses[i] + "</td></tr>");
 			}
 			
-			$("#lower").html($("#lower").html() + "<label class='lblDiv'>~Next Busses: </label><p>" + results + "</p>");
 		}
 		else
 		{
-			$("#lower").html($("#lower").html() + "<p>Sorry, no buses found</p>");
+			$("#tblNextBuses tbody").append("<tr class='rowNumbers'><td>Sorry, no buses found.</td></tr>");
 		}
 	});	
 }
 
 function AjaxError(data)
 {
-	console.log(data);
-	console.log("AjaxError was hit");
+	
 }
 
 function dragFunction(data)
@@ -529,7 +530,6 @@ function locationSuccess(position)
 		{
 			if (!place.geometry)
 			{
-				console.log("Returned place contains no geometry");
 				return;
 			}
 
