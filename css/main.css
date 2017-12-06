@@ -558,15 +558,15 @@ width: 42px;}
 #service .service-tab ul li{ border-right: 1px solid #DBE2E2;}
 #service .service-tab ul li a{color: #9FA9A9; padding-top: 23px; padding-bottom: 17px;font-size: 20px; font-family: 'Raleway', sans-serif; font-weight: 400;display: block; padding-right: 60px}
 #service .service-tab ul li a i{font-size: 45px; margin-right: 40px; position: relative;top: 10px;}
-#service .service-tab ul li a:hover{border-right: 10px solid #5DCA88;padding-right: 50px}
-#service .service-tab ul li a:hover i{color: #5DCA88}
+#service .service-tab ul li a:hover{border-right: 10px solid #2D312F;padding-right: 50px}
+#service .service-tab ul li a:hover i{color: #2D312F}
 
 .edit-tab{overflow: hidden;}
 .edit-tab h1{color: #636C6C; font-size: 24px; font-family: 'Raleway', sans-serif; font-weight: 700; margin: 0px;margin: 0px;padding-bottom: 30px; padding-top:50px;}
 .edit-tab p{color:#AFB8B8; font-size: 16px;font-family: 'Raleway', sans-serif; font-weight: 400; line-height: 24px;margin: 0px;}
 
 .edit-tab-content{padding-top: 30px}
-.teb-icon-edit{ height: 170px;width: 170px; margin: 0 auto; color:#5DCA88;}
+.teb-icon-edit{ height: 170px;width: 170px; margin: 0 auto; color:#2D312F;}
 .teb-icon-edit i{font-size: 170px}
 
 
