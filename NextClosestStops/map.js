@@ -12,21 +12,7 @@ $(document).ready(init);
 
 function init()
 {
-	$("#infoDiv").hide();
-
-	$("#closeInfo").click(function()
-	{
-		$("#infoDiv").hide();
-	});
-
-	//Used for resizing the map to fit the maximum of the screen
-	$("#map").height($(window).height());
-	$(window).resize(function(evt)
-	{
-		$("#map").height($(window).height());
-	});
-
-	$(".nextBusSelect").change(nextBusSelectChanged);
+	initMap();
 }
 
 /*
@@ -155,6 +141,22 @@ function initMap()
 		// Browser doesn't support Geolocation
 		handleLocationError(false, infoWindow, map.getCenter());
 	}
+
+	$("#infoDiv").hide();
+
+	$("#closeInfo").click(function()
+	{
+		$("#infoDiv").hide();
+	});
+
+	//Used for resizing the map to fit the maximum of the screen
+	$("#map").height($(window).height());
+	$(window).resize(function(evt)
+	{
+		$("#map").height($(window).height());
+	});
+
+	$(".nextBusSelect").change(nextBusSelectChanged);
 
 } //end initMap
 
